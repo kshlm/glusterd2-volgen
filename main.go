@@ -19,38 +19,45 @@ func main() {
 
 func generateDummyGraph() volgen.Xlator {
 	dht := volgen.Xlator{
-		Name: "distribute0",
-		Type: "cluster/dht",
+		Name:    "distribute0",
+		Type:    "cluster/dht",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	afr0 := volgen.Xlator{
-		Name: "replicate0",
-		Type: "cluster/afr",
+		Name:    "replicate0",
+		Type:    "cluster/afr",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	afr1 := volgen.Xlator{
-		Name: "replicate1",
-		Type: "cluster/afr",
+		Name:    "replicate1",
+		Type:    "cluster/afr",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	afr2 := volgen.Xlator{
-		Name: "replicate2",
-		Type: "cluster/afr",
+		Name:    "replicate2",
+		Type:    "cluster/afr",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	client0 := volgen.Xlator{
-		Name: "client0",
-		Type: "cluster/afr",
+		Name:    "client0",
+		Type:    "cluster/afr",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	client1 := volgen.Xlator{
-		Name: "client1",
-		Type: "cluster/afr",
+		Name:    "client1",
+		Type:    "cluster/afr",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	client2 := volgen.Xlator{
-		Name: "client2",
-		Type: "cluster/afr",
+		Name:    "client2",
+		Type:    "cluster/afr",
+		Options: map[string]string{"transport-type": "tcp", "ping-timeout": "42"},
 	}
 
 	dht.Children = append(dht.Children, afr0, afr1, afr2)
