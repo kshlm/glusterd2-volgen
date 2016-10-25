@@ -1,5 +1,9 @@
 package volgen
 
+// The following go:generate instruction requires github.com/alvaroloes/enumer
+// to be installed.
+//go:generate enumer -type OptionType,NodeType -output node_enumer.go
+
 import (
 	"errors"
 	"log"
@@ -66,7 +70,7 @@ type Node struct {
 type NodeType int
 
 const (
-	TYPE_NONE = iota
+	TYPE_NONE NodeType = iota
 	TYPE_XLATOR
 	TYPE_TARGET
 	TYPE_MAX
