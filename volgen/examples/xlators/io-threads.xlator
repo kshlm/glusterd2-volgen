@@ -1,0 +1,5 @@
+Name = "I/O threads"
+ID = "io-threads"
+Options = [
+  { Key = "thread-count", Default = "16", Type = "OPT_INT"}
+]

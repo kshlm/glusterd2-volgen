@@ -1,0 +1,9 @@
+Name = "Posix xlator"
+ID = "posix"
+Before = ["NONE"]
+Conflicts = ["bd.xlator"]
+Options = [
+  { Key = "volume-id", Default = "{{volume.id}}", Type = "OPT_STRING" },
+  { Key = "directory", Default = "{{volume.brick.id}}", Type = "OPT_STRING" }
+]
+

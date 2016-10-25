@@ -1,0 +1,20 @@
+Name = "Changetime Recorder"
+ID = "changetimerecorder"
+Before = [ "trash.xlator"]
+After = ["io-threads.xlator", "locks.xlator", "access-control.xlator"]
+Options = [
+    { Key = "sql-db-wal-autocheckpoint", Default = "25000", Type = "OPT_INT" },
+    { Key = "sql-db-cachesize", Default = "12500", Type = "OPT_INT" },
+    { Key = "ctr-record-metadata-heat", Default = "off", Type = "OPT_BOOL" },
+    { Key = "record-counters", Default = "off", Type = "OPT_BOOL" },
+    { Key = "ctr-enabled", Default = "off", Type = "OPT_BOOL" },
+    { Key = "record-entry", Default = "on", Type = "OPT_BOOL" },
+    { Key = "ctr_lookupheal_inode_timeout", Default = "300", Type = "OPT_INT" },
+    { Key = "ctr_lookupheal_link_timeout", Default = "300", Type = "OPT_INT" },
+    { Key = "ctr_link_consistency", Default = "off", Type = "OPT_BOOL" },
+    { Key = "record-exit", Default = "off", Type = "OPT_BOOL" },
+    { Key = "db-path", Default = "/bricks/test-b2/.glusterfs/", Type = "OPT_STRING" },
+    { Key = "db-name", Default = "test-b2.db", Type = "OPT_STRING" },
+    { Key = "hot-brick", Default = "off", Type = "OPT_BOOL" },
+    { Key = "db-type", Default = "sqlite3", Type = "OPT_STRING" }
+]

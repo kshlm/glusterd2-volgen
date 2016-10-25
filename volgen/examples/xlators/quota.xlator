@@ -1,0 +1,10 @@
+Name = "Quota"
+ID = "quota"
+Before = ["io-threads.xlator"]
+After = ["io-stats.xlator"]
+Options = [
+    { Key = "deem-statfs", Default = "off", Type = "OPT_BOOL" },
+    { Key = "timeout", Default = "0", Type = "OPT_INT" },
+    { Key = "server-quota", Default = "off", Type = "OPT_BOOL" },
+    { Key = "volume-uuid", Default = "{{volume.id}}", Type = "OPT_STRING" }
+]

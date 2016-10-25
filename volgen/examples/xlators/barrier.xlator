@@ -1,0 +1,7 @@
+Name = "FOP Barrier"
+ID = "barrier"
+Before = ["io-threads.xlator"]
+Options = [
+    { Key = "barrier-timeout", Default = "120", Type = "OPT_INT"},
+    { Key = "barrier", Default = "off", Type = "OPT_BOOL"}
+]

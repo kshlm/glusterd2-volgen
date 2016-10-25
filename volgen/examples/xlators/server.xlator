@@ -1,0 +1,11 @@
+Name = "Server translator"
+ID = "server"
+After = ["NONE"]
+Options = [
+    { Key = "auth.addr.{{volume.brick.path}}.allow", Default = "*", Type = "OPT_STRING" },
+    { Key = "auth-path", Default = "{{volume.brick.path}}", Type = "OPT_STRING" },
+    { Key = "auth.login.d5e1cd2d-5d23-4a7c-b699-a389cae42e52.password", Default = "e66dd45f-a713-49fc-807f-6dd7576afe0d", Type = "OPT_STRING" },
+    { Key = "auth.login.{{volume.brick.path}}.allow", Default = "d5e1cd2d-5d23-4a7c-b699-a389cae42e52", Type = "OPT_STRING" },
+    { Key = "transport.address-family", Default = "inet", Type = "OPT_STRING" },
+    { Key = "transport-type", Default = "tcp", Type = "OPT_STRING" }
+]

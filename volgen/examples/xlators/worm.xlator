@@ -1,0 +1,8 @@
+Name = "Write once/Read many"
+ID = "worm"
+After = ["io-threads.xlator", "read-only.xlator"]
+Options = [
+    { Key = "worm-file-level", Default = "off", Type = "OPT_BOOL"},
+    { Key = "worm", Default = "off", Type = "OPT_BOOL"}
+]
+

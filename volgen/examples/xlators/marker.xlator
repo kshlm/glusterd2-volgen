@@ -1,0 +1,12 @@
+Name = "Marker"
+ID = "marker"
+Before = ["io-threads.xlator"]
+Options = [
+    { Key = "inode-quota", Default = "off", Type = "OPT_BOOL"},
+    { Key = "quota", Default = "off", Type = "OPT_BOOL"},
+    { Key = "gsync-force-xtime", Default = "off", Type = "OPT_BOOL"},
+    { Key = "xtime", Default = "off", Type = "OPT_BOOL"},
+    { Key = "quota-version", Default = "0", Type = "OPT_INT"},
+    { Key = "timestamp-file", Default = "/var/lib/glusterd/vols/test/marker.tstamp", Type = "OPT_STRING"},
+    { Key = "volume-uuid", Default = "{{volume.id}}", Type = "OPT_STRING"}
+]

@@ -1,0 +1,3 @@
+Name = "Brick - The GlusterFS brick"
+ID = "brick"
+Requires = ["server.xlator", "posix.xlator"]

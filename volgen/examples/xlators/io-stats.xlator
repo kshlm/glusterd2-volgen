@@ -1,0 +1,9 @@
+Name = "I/O Stats collector"
+ID = "io-stats"
+After = ["server.xlator", "decompounder.xlator"]
+Options = [
+    { Key = "count-fop-hits", Default = "off", Type = "OPT_BOOL" },
+    { Key = "latency-measurement", Default = "off", Type = "OPT_BOOL" },
+    { Key = "log-level", Default = "INFO", Type = "OPT_STRING" },
+    { Key = "unique-id", Default = "{{volume.id}}", Type = "OPT_STRING" },
+]

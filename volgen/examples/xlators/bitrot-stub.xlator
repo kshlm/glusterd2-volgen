@@ -1,0 +1,6 @@
+Name = "Bitrot stub"
+ID = "bitrot-stub"
+After = ["io-threads.xlator"]
+Options = [
+  { Key = "export", Default = "{{volume.brick.path}}", Type = "OPT_STRING"}
+]

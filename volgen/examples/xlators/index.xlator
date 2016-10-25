@@ -1,0 +1,8 @@
+Name = "Index xlator for AFR"
+ID = "index"
+Before = ["io-threads.xlator"]
+Options = [
+    { Key = "xattrop-pending-watchlist", Default = "trusted.afr.test-", Type = "OPT_STRING" },
+    { Key = "xattrop-dirty-watchlist", Default = "trusted.afr.dirty", Type = "OPT_STRING" },
+    { Key = "index-base", Default = "/bricks/test-b2/.glusterfs/indices", Type = "OPT_STRING" }
+]

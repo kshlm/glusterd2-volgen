@@ -1,0 +1,10 @@
+Name = "Changelog xlator"
+ID = "changelog"
+Before = ["posix.xlator"]
+After = ["io-threads.xlator"]
+Options = [
+    { Key = "changelog-barrier-timeout", Default = "120", Type = "OPT_INT" },
+    { Key = "changelog-dir", Default = "/bricks/test-b2/.glusterfs/changelogs", Type = "OPT_STRING" },
+    { Key = "changelog-brick", Default = "/bricks/test-b2", Type = "OPT_STRING"}
+]
+

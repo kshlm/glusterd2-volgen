@@ -1,0 +1,8 @@
+Name = "The trash can translator"
+ID = "trash"
+Before = ["posix.xlator"]
+Options = [
+  { Key = "trash-internal-op", Default = "off", Type = "OPT_BOOL" },
+  { Key = "brick-path", Default = "{{ volume.brick.path }}", Type = "OPT_STRING" },
+  { Key = "trash-dir", Default = ".trashcan", Type = "OPT_STRING" }
+]

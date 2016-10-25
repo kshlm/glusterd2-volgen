@@ -1,0 +1,6 @@
+Name = "Leases"
+ID = "leases"
+After = ["io-threads.xlator", "upcall.xlator"]
+Options = [
+  { Key = "leases", Default = "off", Type = "OPT_BOOL"}
+]

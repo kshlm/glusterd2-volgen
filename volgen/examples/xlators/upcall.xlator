@@ -1,0 +1,6 @@
+Name = "Upcall"
+ID = "upcall"
+After = ["io-threads.xlator"]
+Options = [
+  { Key = "cache-invalidation", Default = "off", Type = "OPT_BOOL"}
+]
