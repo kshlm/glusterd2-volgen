@@ -2,7 +2,7 @@ package volgen
 
 // The following go:generate instruction requires github.com/alvaroloes/enumer
 // to be installed.
-//go:generate enumer -type OptionType,NodeType -output node_enumer.go
+//go:generate enumer -type OptionType,NodeType -output nodefile_enumer.go nodefile.go
 
 import (
 	"errors"
