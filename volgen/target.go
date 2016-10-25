@@ -66,3 +66,11 @@ func LoadTarget(path string) (*Target, err) {
 
 	return t, nil
 }
+
+// BuildGraph will resolve dependencies and generate a graph from the
+// xlators/nodes listed in t.Xlators
+func (t *Target) BuildGraph(volume string) (*Node, error) {
+	// TODO: Everything
+
+	return nil, nil
+}
