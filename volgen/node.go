@@ -78,8 +78,8 @@ const (
 
 type Option struct {
 	Key     string
-	Type    OptionType
-	Default interface{}
+	Type    string
+	Default string
 }
 
 type OptionType int
