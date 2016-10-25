@@ -19,7 +19,7 @@ const (
 	targetNodeFile = "info"
 )
 
-func LoadTarget(path string) (*Target, err) {
+func LoadTarget(path string) (*Target, error) {
 	// Ensure the path has targetExt as extension and is a directory
 	if filepath.Ext(path) != targetExt {
 		return nil, ERR_PATH_NOT_TARGET
@@ -41,11 +41,11 @@ func LoadTarget(path string) (*Target, err) {
 	}
 
 	t := &Target{
-		*Node: n,
+		Node: n,
 	}
 
 	// Load target xlators
-	e := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	e = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

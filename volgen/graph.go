@@ -12,7 +12,7 @@ type gNode struct {
 }
 
 // Write will write the graph to the given writer
-func (g *gNode) Write(w *io.Writer) error {
+func (g *gNode) Write(w io.Writer) error {
 	for _, n := range g.children {
 		n.Write(w)
 	}
@@ -23,7 +23,7 @@ func (g *gNode) Write(w *io.Writer) error {
 
 // WriteToFile writes the graph to the given path, creating the volfile.
 // NOTE: Any existing file at the path is truncated.
-func (g *gNode) WriteToFile(path) error {
+func (g *gNode) WriteToFile(path string) error {
 	f, e := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 	if e != nil {
 		return e
