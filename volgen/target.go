@@ -8,10 +8,10 @@ import (
 
 // Target describes a single graph/volfile for eg. the brick graph/volfile
 // A target is a directory with name with a postfix of `targetExt`.
-// This directory should contain sym-links to xlator files of xlators to be
-// contained in the graph. The directory MUST contain a file named
-// `targetNodeFile` with information about the graph.
-// The target NodeFile can explicitly set 'Requires' and 'Conflicts'
+// This directory will contain sym-links to xlator files of xlators or target
+// directories to be contained in the graph. The directory MUST contain a file
+// named `targetNodeFile` with information about the graph.
+// The targetNodeFile can explicitly set 'Requires' and 'Conflicts'
 // dependencies to ensure that specifi xlators are or are not loaded into this
 // graph.
 type Target struct {
