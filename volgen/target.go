@@ -79,7 +79,34 @@ func LoadTarget(path string) (*Target, error) {
 // BuildGraph will resolve dependencies and generate a graph from the
 // xlators/nodes listed in t.Xlators
 func (t *Target) BuildGraph(volume string) (*gNode, error) {
-	// TODO: Everything
+	graph := new(volGraph)
+
+	// Set first xlator in list as root just to get started
+	graph.setRoot(t.Xlators[0])
+
+	for _, nid := range t.Xlators[1:] {
+		n := graph.node(nid)
+
+		// Add node as child of all after dependencies
+		for _, t := range n.After {
+			graph.addChild(nid, t)
+		}
+		// Add all before dependencies as children of n
+		for _, t := range n.Before {
+			graph.addChild(t, nid)
+		}
+		// TODO: Handle requires,conflicts,parent,child
+	}
+	// TODO: Resolve any target nodes if present
+
+	// TODO: Topologically Sort the temporary graph to linearize it
+	// This will provide the graph order
+
+	// TODO: With the ordered graph, generate the final graph by
+	// enabling/disabling nodes based on the volume information
+
+	// TODO: Handle nodes which have multiple children and nodes which can appear
+	// multiple times in the graph (ie. cluster xlators and client xlators)
 
 	return nil, nil
 }
