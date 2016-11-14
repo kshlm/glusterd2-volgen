@@ -18,12 +18,12 @@ func main() {
 		log.Panic("failed to load xlators: ", e)
 	}
 
-	t, e := volgen.LoadTarget(path)
+	t, e := volgen.LoadTarget(os.Args[2])
 	if e != nil {
 		log.Panic("failed to load target: ", e)
 	}
 
-	g, e := t.BuildGraph()
+	g, e := t.BuildGraph("test")
 	if e != nil {
 		log.Panic("building graph failed: ", e)
 	}
