@@ -1,7 +1,7 @@
 Name = "Read-only"
 ID = "read-only"
 After = ["io-threads.xlator"]
-Before = ["work.xlator"]
+Before = ["worm.xlator"]
 Options = [
   { Key = "read-only", Default = "off", Type = "OPT_BOOL"}
 ]
