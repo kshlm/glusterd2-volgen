@@ -4,17 +4,21 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
+	"text/template"
+
+	"github.com/apex/log"
 )
 
 type gNode struct {
 	*Node
-	parent   *gNode
-	children []*gNode
+	Parent   *gNode
+	Children map[string]*gNode
 }
 
 type volGraph struct {
 	root    *gNode
-	members []*gNode
+	members map[string]*gNode
 }
 
 var (
@@ -22,13 +26,68 @@ var (
 	ErrNodeMultipleParents = errors.New("node has more than one parent")
 )
 
+const (
+	volfileTemplate = `
+{{define "volume"}}
+volume {{.Node.Name}}
+	type {{.Node.ID}}{{range $opt := .Node.Options}}
+	option {{$opt.Key}} {{$opt.Default}}{{end}}
+	subvolumes {{range $child := .Children}}{{$child.Node.ID}} {{end}}
+{{end}}
+`
+	dotfileTemplate = `
+{{define "volume"}}
+{{$node := .}}
+{{range $child := .Children}}
+"{{$node.ID}}" -> "{{$child.Node.ID}}"{{end}}
+{{end}}
+`
+	dotHeader  = "digraph {"
+	dotTrailer = "}"
+)
+
+var (
+	volTmpl = template.Must(template.New("volume").Parse(volfileTemplate))
+	dotTmpl = template.Must(template.New("volume").Parse(dotfileTemplate))
+)
+
 // Write will write the graph to the given writer
 func (n *gNode) Write(w io.Writer) error {
-	for _, c := range n.children {
-		c.Write(w)
-	}
-	// TODO: Write actually
+	return n.writeVol(w, make(map[string]bool))
+}
 
+func (n *gNode) writeVol(w io.Writer, processed map[string]bool) error {
+	for _, c := range n.Children {
+		c.writeVol(w, processed)
+	}
+	if !processed[n.ID] {
+		if e := volTmpl.Execute(w, n); e != nil {
+			return e
+		}
+		processed[n.ID] = true
+	}
+	return nil
+}
+
+// WriteDot writes a dot graph of volume to the writer
+func (n *gNode) WriteDot(w io.Writer) error {
+	w.Write([]byte(dotHeader))
+	n.writeDot(w, make(map[string]bool))
+	w.Write([]byte(dotTrailer))
+
+	return nil
+}
+
+func (n *gNode) writeDot(w io.Writer, processed map[string]bool) error {
+	for _, c := range n.Children {
+		c.writeDot(w, processed)
+	}
+	if !processed[n.ID] {
+		if e := dotTmpl.Execute(w, n); e != nil {
+			return e
+		}
+		processed[n.ID] = true
+	}
 	return nil
 }
 
@@ -49,22 +108,39 @@ func (n *gNode) WriteToFile(path string) error {
 // If a matching gNode isn't present, it loads one by searching in the xlatorMap
 // If a match is not found nil is returned
 func (g *volGraph) node(id string) *gNode {
+	log.WithField("node", id).Debug("finding node in graph")
 	// Find a match if present in g.members
-	for _, m := range g.members {
-		if m.ID == id {
-			return m
-		}
+	n, ok := g.members[id]
+	if ok {
+		log.WithField("node", n.ID).Debug("found node")
+		return n
 	}
-	// Find xlator with given ID in the xlator map
-	for _, xl := range xlatorMap {
-		if xl.ID == id {
-			n := &gNode{xl, nil, nil}
-			if g.root != nil {
-				n.parent = g.root
-				g.root.children = append(g.root.children, n)
-			}
-			return n
+	log.WithField("node", id).Debug("node not found in existing members")
+
+	switch ext := filepath.Ext(id); ext {
+	case xlatorExt:
+		log.WithField("node", id).Debug("finding node in global xlator list")
+		xl, err := FindXlator(id)
+		if err != nil {
+			log.WithField("node", id).WithError(err).Error("could not find node")
+			return nil
 		}
+		n := &gNode{xl, nil, make(map[string]*gNode)}
+		g.members[id] = n
+		if g.root != nil {
+			n.Parent = g.root
+			g.root.Children[n.ID] = n
+		}
+		log.WithField("node", n.ID).Debug("found node")
+		return n
+
+	case targetExt:
+		log.WithField("node", id).Debug("TODO: return target")
+		return nil
+
+	default:
+		return nil
+
 	}
 
 	return nil
@@ -72,38 +148,67 @@ func (g *volGraph) node(id string) *gNode {
 
 // setRoot sets the given node as the root of the graph
 func (g *volGraph) setRoot(id string) error {
+	log.WithField("xlatorid", id).Debug("attempting to set graph root")
+
 	r := g.node(id)
 	if r == nil {
 		return ErrNodeNotFound
 	}
+
 	// If a root node exists already make it the child of the new root
 	if g.root != nil {
-		g.root.parent = r
-		r.children = append(r.children, g.root)
+		log.WithFields(log.Fields{
+			"existingroot": g.root.ID,
+			"newroot":      r.ID,
+		}).Debug("existing root found")
+		r.Children[g.root.ID] = g.root
 	}
 	g.root = r
-	g.members = append(g.members, r)
+	log.WithField("xlator", g.root.ID).Debug("root of graph set")
+	log.WithField("children", g.root.Children).Debug("root's children")
 
 	return nil
 }
 
 // addChild adds node as a child of the given parent
 func (g *volGraph) addChild(nid, pid string) error {
+	log.WithFields(log.Fields{
+		"parent": pid,
+		"child":  nid,
+	}).Debug("attempting to add child to parent")
+
 	n := g.node(nid)
 	if n == nil {
 		return ErrNodeNotFound
 	}
 
 	p := g.node(pid)
-	if n == nil {
+	if p == nil {
 		return ErrNodeNotFound
 	}
 
-	if n.parent != nil {
-		return ErrNodeMultipleParents
-	}
-	n.parent = p
-	p.children = append(p.children, n)
+	//if n.Parent != nil {
+	//return ErrNodeMultipleParents
+	//}
+	n.Parent = p
+	p.Children[nid] = n
 
+	log.WithFields(log.Fields{
+		"parent": p.ID,
+		"child":  n.ID,
+	}).Debug("child added to parent")
+	log.WithFields(log.Fields{
+		"parent":   p.ID,
+		"children": p.Children,
+	}).Debug("children of parent")
+	return nil
+}
+
+func (g *volGraph) Write(w io.Writer) error {
+	w.Write([]byte(dotHeader))
+	for _, n := range g.members {
+		dotTmpl.Execute(w, n)
+	}
+	w.Write([]byte(dotTrailer))
 	return nil
 }

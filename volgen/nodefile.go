@@ -6,10 +6,9 @@ package volgen
 
 import (
 	"errors"
-	"log"
 	"os"
-	"path/filepath"
 
+	"github.com/apex/log"
 	"github.com/naoina/toml"
 )
 
@@ -107,31 +106,36 @@ var (
 )
 
 func NodeFromFile(path string) (*Node, error) {
+	log.WithField("path", path).Trace("attempting to load nodefile")
 	var e error
 
 	n := new(Node)
 
 	f, e := os.Open(path)
 	if e != nil {
+		log.WithError(e).WithField("path", path).Error("failed to load file")
 		return nil, e
 	}
 	defer f.Close()
 
 	d := toml.NewDecoder(f)
 	if e = d.Decode(n); e != nil {
+		log.WithError(e).WithField("path", path).Error("failed to decode nodefile")
 		return nil, e
 	}
 
-	if n.Type != TYPE_NONE {
-		log.Print("WARNING: ", "Ignoring Node type set in file")
-	}
+	//if n.Type != TYPE_NONE {
+	//log.Print("WARNING: ", "Ignoring Node type set in file")
+	//}
 
-	ext := filepath.Ext(path)
-	t, ok := extToType[ext]
-	if !ok {
-		return nil, ERR_UNKNOWN_TYPE
-	}
-	n.Type = t
+	//ext := filepath.Ext(path)
+	//t, ok := extToType[ext]
+	//if !ok {
+	//return nil, ERR_UNKNOWN_TYPE
+	//}
+	//n.Type = t
+
+	log.WithField("node", n.ID).Trace("loaded node")
 
 	return n, nil
 }
