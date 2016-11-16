@@ -166,10 +166,11 @@ func (t *Target) BuildGraph(volume string) (*volGraph, error) {
 		}
 		// TODO: Handle requires,conflicts,parent,child
 	}
-	// Set root as parent for any node that doesn't have a parent
-	for _, m := range graph.members {
-		if m != graph.root && m.Parent == nil {
-			m.Parent = graph.root
+	// Set graph.root as parent for any node that doesn't have a parent
+	for nid, n := range graph.members {
+		if n != graph.root && n.Parent == nil {
+			graph.root.Children[nid] = n
+			n.Parent = graph.root
 		}
 	}
 	// TODO: Topologically Sort the temporary graph to linearize it

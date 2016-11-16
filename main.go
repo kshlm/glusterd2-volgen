@@ -13,11 +13,12 @@ import (
 
 func main() {
 	log.SetHandler(text.New(os.Stderr))
-	log.SetLevel(log.FatalLevel)
+	log.SetLevel(log.DebugLevel)
 
 	if len(os.Args) < 3 {
 		log.Fatal("Not enough args: " + os.Args[0] + " <xlators-dir> <target>")
 	}
+	log.WithField("args", os.Args).Info("running glusterd2-volgen")
 
 	if e := volgen.LoadXlators(os.Args[1]); e != nil {
 		log.WithError(e).Fatal("failed to load xlators")
