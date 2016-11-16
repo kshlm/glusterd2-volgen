@@ -30,20 +30,22 @@ const (
 	volfileTemplate = `
 {{define "volume"}}
 volume {{.Node.Name}}
-	type {{.Node.ID}}{{range $opt := .Node.Options}}
-	option {{$opt.Key}} {{$opt.Default}}{{end}}
+	type {{.Node.ID}}
+	{{range $opt := .Node.Options -}}
+	option {{$opt.Key}} {{$opt.Default}}
+	{{- end}}
 	subvolumes {{range $child := .Children}}{{$child.Node.ID}} {{end}}
 {{end}}
 `
 	dotfileTemplate = `
 {{define "volume"}}
-{{$node := .}}
-{{range $child := .Children}}
-"{{$node.ID}}" -> "{{$child.Node.ID}}"{{end}}
+{{- $node := . -}}
+{{- range $child := .Children}}
+"{{$node.ID}}" -> "{{$child.Node.ID}}"{{end -}}
 {{end}}
 `
 	dotHeader  = "digraph {"
-	dotTrailer = "}"
+	dotTrailer = "\n}"
 )
 
 var (
