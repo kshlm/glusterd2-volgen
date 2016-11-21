@@ -1,6 +1,7 @@
 package volgen
 
 import (
+	"container/list"
 	"errors"
 	"io"
 	"os"
@@ -12,7 +13,7 @@ import (
 
 type gNode struct {
 	*Node
-	Parent   *gNode
+	Parents  map[string]*gNode
 	Children map[string]*gNode
 }
 
@@ -127,10 +128,10 @@ func (g *volGraph) node(id string) *gNode {
 			log.WithField("node", id).WithError(err).Error("could not find node")
 			return nil
 		}
-		n := &gNode{xl, nil, make(map[string]*gNode)}
+		n := &gNode{xl, make(map[string]*gNode), make(map[string]*gNode)}
 		g.members[id] = n
 		if g.root != nil {
-			n.Parent = g.root
+			n.Parents[g.root.ID] = g.root
 			g.root.Children[n.ID] = n
 		}
 		log.WithField("node", n.ID).Debug("found node")
@@ -189,10 +190,7 @@ func (g *volGraph) addChild(nid, pid string) error {
 		return ErrNodeNotFound
 	}
 
-	//if n.Parent != nil {
-	//return ErrNodeMultipleParents
-	//}
-	n.Parent = p
+	n.Parents[pid] = p
 	p.Children[nid] = n
 
 	log.WithFields(log.Fields{
@@ -206,6 +204,7 @@ func (g *volGraph) addChild(nid, pid string) error {
 	return nil
 }
 
+// WriteDot writes a graphviz dot-representation of the graph to the io.Writer
 func (g *volGraph) Write(w io.Writer) error {
 	w.Write([]byte(dotHeader))
 	for _, n := range g.members {
@@ -213,4 +212,128 @@ func (g *volGraph) Write(w io.Writer) error {
 	}
 	w.Write([]byte(dotTrailer))
 	return nil
+}
+
+// NewTemplateGraph returns a template graph using the given nodes.  The nodes
+// are dependency resolved and sorted to get a linear graph, which gives the
+// structure of the final graph
+func NewTemplateGraph(nodes map[string]*Node) (*volGraph, error) {
+	g := new(volGraph)
+	g.members = make(map[string]*gNode)
+
+	for nid, n := range nodes {
+		// If the current node cannot come after any other node, it is the root
+		// Panic if root already exists
+		if n.After != nil && n.After[0] == NoneTarget {
+			if g.root == nil {
+				if e := g.setRoot(nid); e != nil {
+					log.WithError(e).WithField("node", nid).Error("failed to set node as root of graph")
+				}
+			} else {
+				log.WithFields(log.Fields{
+					"oldroot": g.root.ID,
+					"newroot": n.ID,
+				}).Fatal("multiple roots found")
+			}
+		} else {
+			log.WithFields(log.Fields{
+				"node":  nid,
+				"after": n.After,
+			}).Debug("AFTER dependecies for node")
+
+			// Add node as child of all AFTER dependencies
+			for _, t := range n.After {
+				log.WithFields(log.Fields{
+					"node":       nid,
+					"other":      t,
+					"dependency": "AFTER",
+				}).Debug("setting dependency for node")
+
+				if e := g.addChild(nid, t); e != nil {
+					log.WithFields(log.Fields{
+						"node":       nid,
+						"other":      t,
+						"dependency": "AFTER",
+					}).WithError(e).Error("setting dependency for node failed")
+					return nil, e
+				}
+			}
+		}
+		// Add all BEFORE dependencies as children of n
+		log.WithFields(log.Fields{
+			"xlator": n.ID,
+			"before": n.Before,
+		}).Debug("BEFORE dependecies for xlator")
+
+		for _, t := range n.Before {
+			if t == NoneTarget {
+				continue
+			}
+			log.WithFields(log.Fields{
+				"node":       nid,
+				"other":      t,
+				"dependency": "BEFORE",
+			}).Debug("setting dependency for node")
+			// Add t as child of n
+			if e := g.addChild(t, nid); e != nil {
+				log.WithFields(log.Fields{
+					"node":       n.ID,
+					"other":      t,
+					"dependency": "BEFORE",
+				}).WithError(e).Error("setting dependency for node failed")
+				return nil, e
+			}
+		}
+
+		// TODO: Handle requires,conflicts,parent,child
+	}
+	// Set graph.root as parent for any node that doesn't have a parent
+	for nid, n := range g.members {
+		if n != g.root && len(n.Parents) == 0 {
+			g.root.Children[nid] = n
+			n.Parents[g.root.ID] = g.root
+		}
+	}
+	// TODO: Topologically Sort the temporary graph to linearize it
+	// This will provide the graph order
+	g.topoSort()
+
+	return g, nil
+}
+
+// topoSort linearizes the dependency graph by topologically sorting it
+func (g *volGraph) topoSort() {
+	L := list.New()
+	visited := make(map[string]bool)
+
+	visit(g.root, visited, L)
+
+	ce := L.Front()
+	ne := ce.Next()
+
+	for ne != nil {
+		c := ce.Value.(*gNode)
+		n := ne.Value.(*gNode)
+
+		c.Children = make(map[string]*gNode)
+		n.Parents = make(map[string]*gNode)
+
+		c.Children[n.ID] = n
+		n.Parents[c.ID] = c
+
+		ce = ne
+		ne = ce.Next()
+	}
+}
+
+func visit(n *gNode, visited map[string]bool, L *list.List) {
+	if !visited[n.ID] {
+		visited[n.ID] = true
+		log.WithField("node", n.ID).Debug("TOPOSORT visiting")
+		for _, m := range n.Children {
+			visit(m, visited, L)
+		}
+		L.PushFront(n)
+		log.WithField("node", n.ID).Debug("TOPOSORT pushed node")
+	}
 }
